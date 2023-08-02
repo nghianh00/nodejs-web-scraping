@@ -1,46 +1,62 @@
 import puppeteer from "puppeteer";
 import * as cheerio from "cheerio";
-import axios from "axios";
 
+import { scrollPageToBottom } from "puppeteer-autoscroll-down";
+// let scraping = false;
 export default async function Scraper() {
+  // if (scraping === true) return;
   const dataArray = [];
-  const browser = await puppeteer.launch();
-  const page = await browser.newPage();
+  let browser, page;
+  // scraping = true;
+  browser = await puppeteer.launch({ headless: "new" });
+  page = await browser.newPage();
   await page.goto("https://coinmarketcap.com/");
-  await autoScroll(page);
-  const data = await page.content();
+  await scrollPageToBottom(page, { size: 1000 });
 
+  const data = await page.content();
   const $ = cheerio.load(data);
-  $(".cOXNvh tbody")
+  $(".cmc-table tbody")
     .find("tr")
     .each((index, el) => {
       const name = $(el).find(".kKpPOn").text();
-      dataArray.push(name);
+      const price = $(el).find(".cmc-link span").text();
+      dataArray.push({ name, price });
     });
 
   await browser.close();
-  // axios.post(
-  //   `https://web-scraping-fb6b7-default-rtdb.asia-southeast1.firebasedatabase.app/.json`,
-  //   "test"
-  // );
-  return console.log(dataArray);
+  return (
+    <ul>
+      {dataArray.map((ea) => (
+        <li>{ea.name}</li>
+      ))}
+    </ul>
+  );
+  // try {
+  //   test();
+  // } catch (err) {
+  //   console.log(err.message);
+  // } finally {
+  //   await page.reload();
+  //   // scraping = false;
+  //   await setTimeout(test, 5000);
+  // }
 }
 
-async function autoScroll(page) {
-  await page.evaluate(async () => {
-    await new Promise((resolve) => {
-      var totalHeight = 0;
-      var distance = 100;
-      var timer = setInterval(() => {
-        var scrollHeight = document.body.scrollHeight;
-        window.scrollBy(0, distance);
-        totalHeight += distance;
+// async function autoScroll(page) {
+//   await page.evaluate(async () => {
+//     await new Promise((resolve) => {
+//       var totalHeight = 0;
+//       var distance = 100;
+//       var timer = setInterval(() => {
+//         var scrollHeight = document.body.scrollHeight;
+//         window.scrollBy(0, distance);
+//         totalHeight += distance;
 
-        if (totalHeight >= scrollHeight - window.innerHeight) {
-          clearInterval(timer);
-          resolve();
-        }
-      }, 100);
-    });
-  });
-}
+//         if (totalHeight >= scrollHeight - window.innerHeight) {
+//           clearInterval(timer);
+//           resolve();
+//         }
+//       }, 100);
+//     });
+//   });
+// }

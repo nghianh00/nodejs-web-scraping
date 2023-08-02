@@ -1,14 +1,13 @@
 "use client";
-export default function ClientComponent({ scraper }) {
+
+export default function HomePage({ children }) {
   return (
     <div>
-      <button
-        className="flex min-h-screen flex-col items-center justify-between p-24"
-        onClick={() => console.log("clicked")}
-      >
+      <button className="bg-cyan-100" onClick={() => console.log("clicked")}>
         content
       </button>
-      {scraper}
+      <div className="p-40 bg-red-500">hello</div>
+      {children}
     </div>
   );
 }
