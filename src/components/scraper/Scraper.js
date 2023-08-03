@@ -2,44 +2,53 @@ import puppeteer from "puppeteer";
 import * as cheerio from "cheerio";
 
 import { scrollPageToBottom } from "puppeteer-autoscroll-down";
+import Modal from "../ui/Modal";
 // let scraping = false;
+
 export default async function Scraper() {
-  // if (scraping === true) return;
-  const dataArray = [];
   let browser, page;
+  const dataArray = [];
+
+  // if (scraping === true) return;
+
   // scraping = true;
-  browser = await puppeteer.launch({ headless: "new" });
-  page = await browser.newPage();
-  await page.goto("https://coinmarketcap.com/");
-  await scrollPageToBottom(page, { size: 1000 });
+  // browser = await puppeteer.launch({ headless: "new" });
+  // page = await browser.newPage();
 
-  const data = await page.content();
-  const $ = cheerio.load(data);
-  $(".cmc-table tbody")
-    .find("tr")
-    .each((index, el) => {
-      const name = $(el).find(".kKpPOn").text();
-      const price = $(el).find(".cmc-link span").text();
-      dataArray.push({ name, price });
-    });
+  try {
+    browser = await puppeteer.launch({ headless: "new" });
+    page = await browser.newPage();
+    await page.goto("https://coinmarketcap.com/");
 
-  await browser.close();
-  return (
-    <ul>
-      {dataArray.map((ea) => (
-        <li>{ea.name}</li>
-      ))}
-    </ul>
-  );
-  // try {
-  //   test();
-  // } catch (err) {
-  //   console.log(err.message);
-  // } finally {
-  //   await page.reload();
-  //   // scraping = false;
-  //   await setTimeout(test, 5000);
-  // }
+    await scrollPageToBottom(page, { size: 1000 });
+    console.time("time");
+    const data = await page.content();
+    console.timeEnd("time");
+    const $ = cheerio.load(data);
+    $(".cmc-table tbody")
+      .find("tr")
+      .each((index, el) => {
+        const name = $(el).find(".kKpPOn").text();
+        const price = $(el).find(".cmc-link span").text();
+        dataArray.push({ name, price });
+      });
+
+    return (
+      <ul>
+        {dataArray.map((ea) => (
+          <Modal>
+            <li>{ea.name}</li>
+          </Modal>
+        ))}
+      </ul>
+    );
+  } catch (err) {
+    console.log(err.message);
+  } finally {
+    // await page.reload();
+    // scraping = false;
+    await browser.close();
+  }
 }
 
 // async function autoScroll(page) {
