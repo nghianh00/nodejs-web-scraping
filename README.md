@@ -11,6 +11,4 @@ yarn dev
 # or
 npm dev
 ```
-test branch text
-adsfjaskldfklasdjfk
-new code
+github username test
